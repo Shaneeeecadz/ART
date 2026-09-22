@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Art Examination — 1-by-1 Mode</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 950: '#020617' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- START SCREEN -->
+    <div id="start-screen" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+            
+            <div class="flex items-center justify-center w-16 h-16 bg-indigo-600/20 text-indigo-400 rounded-2xl mb-6 mx-auto border border-indigo-500/30">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            </div>
+
+            <h1 class="text-2xl font-bold text-center text-white mb-2">Visual Art & Movements Quiz</h1>
+            <p class="text-slate-400 text-center text-sm mb-6">
+                Question-by-Question Mode with Instant Feedback & Rationales. (75 Total Items)
+            </p>
+
+            <form id="start-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                        Student Name (SURNAME, FIRST NAME) <span class="text-red-400">*</span>
+                    </label>
+                    <div class="relative">
+                        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        <input
+                            type="text"
+                            id="student-name-input"
+                            required
+                            placeholder="DELA CRUZ, JUAN"
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-medium uppercase"
+                        />
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/60 rounded-xl p-4 border border-slate-800 space-y-2 text-xs text-slate-300">
+                    <div class="flex items-center space-x-2 text-slate-200 font-medium">
+                        <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Guidelines:</span>
+                    </div>
+                    <ul class="list-disc list-inside space-y-1 text-slate-400">
+                        <li>Show 1 question at a time</li>
+                        <li>Get instant correct/incorrect feedback</li>
+                        <li>Next button unlocks after selecting an answer</li>
+                        <li>Comprehensive summary score at the end</li>
+                    </ul>
+                </div>
+
+                <button
+                    type="submit"
+                    class="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                >
+                    <span>Start Quiz</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- STICKY HEADER -->
+    <header id="exam-header" class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 hidden">
+        <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
+            <div>
+                <h1 class="text-sm font-bold text-white">Art Mock Examination</h1>
+                <p id="header-student-name" class="text-xs text-indigo-400 font-medium"></p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="flex-1 max-w-xs mx-4">
+                <div class="flex justify-between text-xs text-slate-400 mb-1">
+                    <span id="progress-label">Question 1 of 75</span>
+                    <span id="progress-percent">1%</span>
+                </div>
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300" style="width: 1%"></div>
+                </div>
+            </div>
+
+            <!-- Score Tracker Badge -->
+            <div class="flex items-center space-x-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-200">
+                <span>Score: <strong id="live-score" class="text-emerald-400">0</strong></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main id="exam-workspace" class="flex-1 max-w-4xl w-full mx-auto p-4 py-8 flex flex-col justify-center hidden">
+        <div id="question-card" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+            <!-- Dynamically populated question view -->
+        </div>
+    </main>
+
+    <!-- RESULTS SCREEN -->
+    <div id="results-screen" class="max-w-4xl w-full mx-auto p-4 py-12 space-y-8 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+            <div id="banner-accent" class="absolute top-0 left-0 w-full h-2.5 bg-emerald-500"></div>
+            
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="space-y-2 text-center md:text-left">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 inline-block">Final Scorecard</span>
+                    <h2 id="result-student-name" class="text-2xl font-bold text-white">STUDENT NAME</h2>
+                    <p class="text-xs text-slate-400">All 75 Questions Completed</p>
+                </div>
+
+                <div class="flex items-center space-x-5 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                    <div class="text-center">
+                        <span id="result-raw-score" class="block text-3xl font-extrabold text-white">0 <span class="text-slate-600 text-lg">/ 75</span></span>
+                        <span class="text-xs text-slate-400 uppercase">Raw Score</span>
+                    </div>
+                    <div class="h-10 w-px bg-slate-800"></div>
+                    <div class="text-center">
+                        <span id="result-percentage" class="block text-3xl font-extrabold text-emerald-400">0%</span>
+                        <span class="text-xs text-slate-400 uppercase">Percentage</span>
+                    </div>
+                    <div class="h-10 w-px bg-slate-800"></div>
+                    <div class="text-center">
+                        <span id="result-badge" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">PASSED</span>
+                    </div>
+                </div>
+
+                <button onclick="location.reload()" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer shadow-lg shadow-indigo-600/20">
+                    Retake Quiz
+                </button>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <h3 class="text-lg font-bold text-white">Review All Questions</h3>
+            <div id="results-review-list" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ENGINE -->
+    <script>
+        const QUESTION_BANK = [
+            { id: 1, category: "Elements & Principles", prompt: "A sculptor creates an artwork entirely from cubes and spheres. Which type of form is being emphasized?", options: ["Organic form", "Visual texture", "Geometric form", "Implied texture"], correctIndex: 2, explanation: "Cubes and spheres are standard mathematical shapes; when rendered three-dimensionally, they form geometric forms." },
+            { id: 2, category: "Elements & Principles", prompt: "A tile designer creates a floor using repeating diamond shapes arranged in an organized sequence. What kind of pattern is demonstrated?", options: ["Organic pattern", "Abstract pattern", "Geometric pattern", "Physical pattern"], correctIndex: 2, explanation: "Diamond shapes are structured geometric shapes. Repeating them in an organized sequence creates a geometric pattern." },
+            { id: 3, category: "Elements & Principles", prompt: "A painter changes a light yellow into a darker yellow without changing its basic color family. Which characteristic is primarily being changed?", options: ["Hue", "Value", "Pattern", "Texture"], correctIndex: 1, explanation: "Value refers to the lightness or darkness of a color. Changing light yellow to dark yellow adjusts its value while maintaining its hue." },
+            { id: 4, category: "Elements & Principles", prompt: "During a drawing activity, Carlo creates many parallel lines that do not cross each other to shade a tree trunk. What technique is he using?", options: ["Cross-hatching", "Hatching", "Zigzag shading", "Broken-line shading"], correctIndex: 1, explanation: "Hatching involves drawing parallel lines to build tonal value. Cross-hatching requires lines to intersect." },
+            { id: 5, category: "Elements & Principles", prompt: "A sculptor creates a cube-shaped artwork using actual solid material. Which concept best describes the three-dimensional quality of the object?", options: ["Shape", "Form", "Pattern", "Line"], correctIndex: 1, explanation: "Form refers to three-dimensional objects having length, width, and depth/mass, whereas shape is two-dimensional." },
+            { id: 6, category: "Elements & Principles", prompt: "A child creates a drawing of lightning using lines that repeatedly change direction abruptly. What type of line is being demonstrated?", options: ["Curved line", "Zigzag line", "Broken line", "Horizontal line"], correctIndex: 1, explanation: "Zigzag lines consist of sharp, abrupt directional changes, mimicking lightning bolts." },
+            { id: 7, category: "Elements & Principles", prompt: "A painter creates a dramatic religious scene by placing very bright highlights beside extremely dark shadows. Which technique is most appropriate?", options: ["Chiaroscuro", "Hatching", "One-point perspective", "Color saturation"], correctIndex: 0, explanation: "Chiaroscuro (Italian for light-dark) is the strong contrast between light and dark to create dramatic depth and volumetric forms." },
+            { id: 8, category: "Elements & Principles", prompt: "A student draws distant buildings with lighter values and nearby buildings with darker values. What spatial principle is being applied?", options: ["Color and value", "Shape and pattern", "Texture and form", "Line and perspective"], correctIndex: 0, explanation: "Atmospheric perspective uses value changes (lighter values for distant objects) to depict depth and distance." },
+            { id: 9, category: "Elements & Principles", prompt: "A painter wants to reproduce the exact color family of a Philippine sunset. Which concept refers to where a color is located on the color wheel?", options: ["Value", "Hue", "Saturation", "Texture"], correctIndex: 1, explanation: "Hue is the distinct name or location of a pure color family on the chromatic spectrum/color wheel (e.g., red, orange)." },
+            { id: 10, category: "Elements & Principles", prompt: "A student draws a square whose four sides connect completely at the corners. Which type of shape is demonstrated?", options: ["Open shape", "Broken shape", "Closed shape", "Organic shape"], correctIndex: 2, explanation: "A closed shape is formed when a line connects fully back to its origin or encloses an area completely." },
+            { id: 11, category: "Elements & Principles", prompt: "A painter creates a realistic sphere by adding highlights and shadows so that the flat circle appears three-dimensional. Which elements are primarily working together?", options: ["Light, shadow, and value", "Hue, saturation, and pattern", "Line, shape, and texture", "Space, pattern, and saturation"], correctIndex: 0, explanation: "Manipulating light, shadows, and subtle gradations of value transforms flat 2D shapes into 3D-appearing volumetric forms." },
+            { id: 12, category: "Elements & Principles", prompt: "Maria is drawing a street scene. She wants the buildings in front to appear closer while the buildings behind them appear farther away. Which technique should she primarily use?", options: ["Make distant objects smaller than nearby objects", "Make distant objects darker than nearby objects", "Make distant objects more detailed than nearby objects", "Make distant objects lower within the picture plane"], correctIndex: 0, explanation: "Relative size scale dictates that smaller objects visually retreat into the distance compared to larger foreground elements." },
+            { id: 13, category: "Elements & Principles", prompt: "A student is designing a logo and wants to use a perfectly recognizable circle and triangle. Which type of shape is most appropriate?", options: ["Organic shape", "Freeform shape", "Geometric shape", "Implied shape"], correctIndex: 2, explanation: "Circles, triangles, squares, and regular polygons are mathematically defined geometric shapes." },
+            { id: 14, category: "Elements & Principles", prompt: "A student mixes gray into a pure green color to make it less intense. Which color treatment is demonstrated?", options: ["Tint", "Shade", "Tone", "Hue"], correctIndex: 2, explanation: "Tone is created by adding gray to a pure hue, muting its saturation without making it purely lighter (tint) or darker (shade)." },
+            { id: 15, category: "Elements & Principles", prompt: "A designer repeats the same leaf motif throughout a fabric design. Which element of art is most clearly demonstrated?", options: ["Form", "Value", "Pattern", "Perspective"], correctIndex: 2, explanation: "Pattern is the repetition of visual elements, motifs, or units across a composition." },
+            { id: 16, category: "Elements & Principles", prompt: "An artist paints a human figure with an irregular, naturally flowing structure. Which type of form best describes the figure?", options: ["Geometric form", "Organic form", "Regular shape", "Linear shape"], correctIndex: 1, explanation: "Organic forms are asymmetrical, fluid, irregular, and typically found in natural biological organisms like humans." },
+            { id: 17, category: "Elements & Principles", prompt: "An artist creates an artwork that suggests movement through changes occurring over intervals of time. Which type of space is most closely associated with this treatment?", options: ["Two-dimensional space", "Three-dimensional space", "Four-dimensional space", "Negative space"], correctIndex: 2, explanation: "Four-dimensional space incorporates time and dynamic physical or perceived motion as active elements in art." },
+            { id: 18, category: "Elements & Principles", prompt: "A graphic artist uses sharply slanted lines to suggest speed and movement in a sports poster. Which type of line is most appropriate?", options: ["Horizontal lines", "Vertical lines", "Diagonal lines", "Curved lines"], correctIndex: 2, explanation: "Diagonal lines convey dynamic energy, instability, speed, and active movement." },
+            { id: 19, category: "Elements & Principles", prompt: "A painter wants the objects closest to the viewer to appear warmer and darker than distant objects. Which approach from the lesson should be applied?", options: ["Use cooler colors and lighter values for distant objects", "Use warmer colors and lighter values for distant objects", "Use cooler colors and darker values for distant objects", "Use warmer colors and equal values for distant objects"], correctIndex: 0, explanation: "Aerial/atmospheric perspective shows that distance causes colors to shift cooler (bluer) and lighter in value." },
+            { id: 20, category: "Elements & Principles", prompt: "A student draws the irregular outline of a leaf without using mathematical measurements. What type of shape is represented?", options: ["Geometric shape", "Organic shape", "Closed geometric form", "Regular geometric pattern"], correctIndex: 1, explanation: "Natural forms like leaves have unique, non-mathematical outlines classified as organic shapes." },
+            { id: 21, category: "Elements & Principles", prompt: "An artist draws a calm ocean using long lines that run from left to right. Which type of line best communicates this direction?", options: ["Diagonal lines", "Vertical lines", "Zigzag lines", "Horizontal lines"], correctIndex: 3, explanation: "Horizontal lines run parallel to the horizon and evoke tranquility, rest, stability, and calm." },
+            { id: 22, category: "Elements & Principles", prompt: "Juan creates a poster where a large red circle occupies the center, while the surrounding empty area emphasizes the circle. What type of space is the surrounding area?", options: ["Positive space around the central object", "Three-dimensional space around the central object", "Negative space around the central object", "Four-dimensional space around the central object"], correctIndex: 2, explanation: "Negative space is the empty or background space that surrounds and defines the main subject (positive space)." },
+            { id: 23, category: "Elements & Principles", prompt: "A student observes the repeated arrangement of leaves on a tree and uses it as inspiration for an artwork. Which type of pattern is represented?", options: ["Geometric pattern", "Organic pattern", "Linear pattern", "Regular pattern"], correctIndex: 1, explanation: "Patterns derived from nature's irregular, biological arrangements are known as organic patterns." },
+            { id: 24, category: "Elements & Principles", prompt: "A student creates an artwork that gives the viewer a strong sense of length, width, and height even though the artwork is presented on a flat surface. Which concept is demonstrated?", options: ["Two-dimensional space", "Three-dimensional space", "Four-dimensional space", "Negative-dimensional space"], correctIndex: 1, explanation: "Simulating depth (height, width, and spatial depth) on a 2D surface gives the illusion of three-dimensional space." },
+            { id: 25, category: "Elements & Principles", prompt: "A student creates an illustration using lines with small gaps while still maintaining the direction of the line. Which type of line is demonstrated?", options: ["Broken line", "Curved line", "Vertical line", "Horizontal line"], correctIndex: 0, explanation: "Broken lines contain intentional spaces or interruptions along their path while still leading the eye continuously." },
+            { id: 26, category: "Elements & Principles", prompt: "During an art exhibit, a viewer notices that the empty area surrounding a large sculpture helps make the sculpture stand out. Which concept explains this observation?", options: ["Negative space", "Positive space", "Physical texture", "Geometric form"], correctIndex: 0, explanation: "The void or empty space surrounding a sculpture is negative space, framing and isolating the physical form." },
+            { id: 27, category: "Elements & Principles", prompt: "A landscape artist makes distant mountains smaller than nearby trees to create depth. Which spatial technique is being applied?", options: ["Size", "Detail", "Overlapping", "Value"], correctIndex: 0, explanation: "Varying relative size establishes visual distance; smaller objects appear further back in the picture plane." },
+            { id: 28, category: "Elements & Principles", prompt: "A designer wants a poster to communicate strength and upward movement. Which type of line would best support this visual intention?", options: ["Vertical lines", "Horizontal lines", "Broken lines", "Curved lines"], correctIndex: 0, explanation: "Vertical lines project height, dignity, strength, power, and upward aspirations." },
+            { id: 29, category: "Elements & Principles", prompt: "A student wants to make the shadow of a drawing significantly darker. She adds more intersecting linear strokes. Which technique is most suitable?", options: ["Hatching", "Curved-line drawing", "Cross-hatching", "Broken-line drawing"], correctIndex: 2, explanation: "Cross-hatching overlaps multiple sets of intersecting parallel lines to create dense, dark shadows." },
+            { id: 30, category: "Elements & Principles", prompt: "A digital artist creates an image of a stone wall using shadows and brush marks that make the wall look rough. Which concept is demonstrated?", options: ["Physical texture", "Visual texture", "Geometric form", "Positive space"], correctIndex: 1, explanation: "Visual (implied) texture looks tactile on a 2D surface, but feels completely smooth to the physical touch." },
+            { id: 31, category: "Elements & Principles", prompt: "A student is asked to explain why a particular artwork looks three-dimensional. She says that the artist used illumination, dark areas, and differences in lightness or darkness to create depth. Which combination best describes her explanation?", options: ["Line, shape, and pattern", "Hue, saturation, and texture", "Light, shadow, and value", "Space, form, and pattern"], correctIndex: 2, explanation: "Light, shadow, and tonal value variations model form on flat surfaces to simulate realism." },
+            { id: 32, category: "Elements & Principles", prompt: "A designer makes a bright red advertisement less vivid and more muted. Which color characteristic is the designer changing?", options: ["Hue", "Value", "Saturation", "Pattern"], correctIndex: 2, explanation: "Saturation (chroma/intensity) measures the purity, vividness, or dullness of a color." },
+            { id: 33, category: "Elements & Principles", prompt: "A student draws a landscape where mountains are placed high on the paper to make them appear farther from the viewer. Which use of space is demonstrated?", options: ["Overlapping objects within the picture plane", "Placement of objects within the picture plane", "Increasing the size of distant objects visually", "Adding stronger details to distant objects"], correctIndex: 1, explanation: "Vertical placement on the picture plane dictates that objects positioned higher up usually appear further away towards the horizon." },
+            { id: 34, category: "Elements & Principles", prompt: "A painter adds black to a pure red color to make it darker. Which color treatment is being created?", options: ["Tint", "Tone", "Hue", "Shade"], correctIndex: 3, explanation: "A shade is produced by adding black to any pure color hue to lower its value." },
+            { id: 35, category: "Elements & Principles", prompt: "A student creates a drawing on paper that shows only length and width without actual thickness. Which type of space is represented by the surface?", options: ["Two-dimensional space", "Three-dimensional space", "Four-dimensional space", "Positive-dimensional space"], correctIndex: 0, explanation: "Two-dimensional space (2D) possesses length and width dimensions only." },
+            { id: 36, category: "Elements & Principles", prompt: "A photographer adjusts an image so the colors become extremely vivid and rich. Which characteristic has been increased?", options: ["Saturation", "Texture", "Perspective", "Negative space"], correctIndex: 0, explanation: "Increasing saturation boosts the intensity, richness, and purity of the colors in an image." },
+            { id: 37, category: "Elements & Principles", prompt: "A painter creates the appearance of rough tree bark using brushstrokes, although the canvas itself remains smooth. What type of texture is being created?", options: ["Physical texture", "Tactile texture", "Visual texture", "Actual material texture"], correctIndex: 2, explanation: "Visual texture gives the illusion of tactile surfaces on a smooth 2D plane." },
+            { id: 38, category: "Elements & Principles", prompt: "During an art workshop, a student claims that adding white to a color creates a shade, adding black creates a tint, and adding gray creates a hue. Which response is most accurate?", options: ["All three statements correctly describe color treatments", "Only the statement about gray correctly describes color treatment", "Only the statement about black correctly describes color treatment", "None of the above statements correctly describes the treatments"], correctIndex: 3, explanation: "All three statements are incorrect: Adding white creates a tint, adding black creates a shade, and adding gray creates a tone." },
+            { id: 39, category: "Elements & Principles", prompt: "A painter makes nearby objects highly detailed while using fewer details for distant objects. Which method of creating space is demonstrated?", options: ["Placement", "Size", "Detail", "Overlapping"], correctIndex: 2, explanation: "The detail clarity principle (aerial perspective) states that closer objects show sharp detail, whereas distant objects lose definition." },
+            { id: 40, category: "Elements & Principles", prompt: "An abstract painter repeatedly arranges irregular shapes and colors in a chaotic but recurring arrangement. Which pattern best describes the artwork?", options: ["Geometric pattern", "Organic pattern", "Abstract pattern", "Physical pattern"], correctIndex: 2, explanation: "Non-representational, irregular repeating elements create an abstract pattern." },
+            { id: 41, category: "Elements & Principles", prompt: "A student touches a sculpture and notices that its rough surface can actually be felt. What type of texture is present?", options: ["Visual texture", "Physical texture", "Implied texture", "Patterned texture"], correctIndex: 1, explanation: "Physical (tactile or actual) texture refers to real, tangible surface qualities that can be felt with hands." },
+            { id: 42, category: "Elements & Principles", prompt: "A sculptor sands one part of a wooden artwork until it becomes smooth while leaving another portion rough. What artistic element is being intentionally manipulated?", options: ["Texture", "Perspective", "Saturation", "Negative space"], correctIndex: 0, explanation: "Varying surface qualities between smooth and rough is a direct manipulation of physical texture." },
+            { id: 43, category: "Elements & Principles", prompt: "A student sketches a street corner and uses two vanishing points to create a realistic sense of depth. What technique is most appropriate?", options: ["One-point linear perspective", "Two-point linear perspective", "Overlapping space technique", "Placement-on-paper technique"], correctIndex: 1, explanation: "Two-point linear perspective uses two distinct vanishing points on the horizon line, ideal for viewing corner structures." },
+            { id: 44, category: "Elements & Principles", prompt: "While creating a poster, Lea draws a rainbow using a curved line whose two ends do not meet. What kind of shape does this demonstrate?", options: ["Closed shape", "Geometric shape", "Organic form", "Open shape"], correctIndex: 3, explanation: "An open shape is created by lines that do not connect back to their starting point to enclose a space." },
+            { id: 45, category: "Elements & Principles", prompt: "A student wants a portrait to look more three-dimensional. She carefully places highlights on one side and shadows on the opposite side. What is the main purpose?", options: ["To create repeated patterns", "To emphasize form and create depth", "To increase the number of geometric shapes", "To remove negative space from the portrait"], correctIndex: 1, explanation: "Strategic highlight and shadow placement models light on a flat surface, emphasizing 3D form and visual depth." },
+            { id: 46, category: "Elements & Principles", prompt: "A fashion illustrator draws the flowing edge of a dress using lines that gradually change direction. Which line type is most appropriate?", options: ["Diagonal lines", "Broken lines", "Curved lines", "Zigzag lines"], correctIndex: 2, explanation: "Curved lines change direction gradually, conveying graceful motion, fluidity, and softness." },
+            { id: 47, category: "Elements & Principles", prompt: "An artist adds white to a pure blue color to create a lighter blue. What is the resulting color treatment called?", options: ["Shade", "Tone", "Tint", "Hue"], correctIndex: 2, explanation: "A tint is a color produced by combining a pure hue with white to increase lightness." },
+            { id: 48, category: "Elements & Principles", prompt: "A student places a large object in front of a smaller object, partially blocking the smaller one. The smaller object appears farther away. Which technique is being used?", options: ["Placement on the paper", "Overlapping", "Color saturation", "Cross-hatching"], correctIndex: 1, explanation: "Overlapping occurs when one object partially covers another, signaling to the brain that the covered object is behind." },
+            { id: 49, category: "Elements & Principles", prompt: "An architecture student wants to make a hallway drawing look realistic. He uses lines that appear to meet at one point in the distance. Which technique is he using?", options: ["Two-point linear perspective", "One-point linear perspective", "Cross-hatching perspective", "Four-dimensional perspective"], correctIndex: 1, explanation: "One-point linear perspective relies on a single vanishing point toward which all parallel receding lines (orthogonals) converge." },
+            { id: 50, category: "Elements & Principles", prompt: "While drawing a portrait, Ana notices that the face appears flat. She adds darker areas under the nose and chin and lighter areas on the forehead. Which concept is she applying?", options: ["Shape and pattern", "Line and texture", "Light, shadow, and value", "Hue, saturation, and pattern"], correctIndex: 2, explanation: "Applying light highlights and dark shadows adjusts value gradients to transform flat features into sculpted 3D forms." },
+            { id: 51, category: "Art Movements", prompt: "An artist wants to show the exact appearance of a busy Filipino public market, including realistic people, objects, and surroundings. Which style would best suit the purpose?", options: ["Expressionism", "Fauvism", "Realism", "Surrealism"], correctIndex: 2, explanation: "Realism aims to depict subjects truthfully and accurately without idealization or exotic embellishment." },
+            { id: 52, category: "Art Movements", prompt: "A painter focuses on changing sunlight on the Manila Bay and uses short, visible brushstrokes to capture a particular moment. Which style is most evident?", options: ["Cubism", "Impressionism", "Realism", "Romanticism"], correctIndex: 1, explanation: "Impressionism emphasizes short, visible strokes to capture transient light, atmospheric changes, and fleeting moments." },
+            { id: 53, category: "Art Movements", prompt: "Which combination correctly matches the painting style with its primary characteristic?", options: ["Cubism — dreamlike unconscious imagery", "Expressionism — accurate photographic details", "Fauvism — bold and unconventional colors", "Romanticism — geometric fragmentation"], correctIndex: 2, explanation: "Fauvism (pioneered by Matisse) is famous for vibrant, non-naturalistic, bold, and intense color choices." },
+            { id: 54, category: "Art Movements", prompt: "Which statement BEST explains the difference between Fauvism and Expressionism?", options: ["Fauvism primarily emphasizes bold color, while Expressionism emphasizes inner emotional experience.", "Fauvism primarily emphasizes realistic details, while Expressionism emphasizes nature.", "Fauvism primarily emphasizes dreams, while Expressionism emphasizes geometric forms.", "Fauvism primarily emphasizes perspective, while Expressionism emphasizes historical accuracy."], correctIndex: 0, explanation: "Fauvism explores expressive, wild color for visual energy, whereas Expressionism distorts reality to project deep psychological emotions." },
+            { id: 55, category: "Art Movements", prompt: "Which situation BEST represents Romanticism?", options: ["A portrait divided into geometric planes", "A portrait using completely unnatural colors", "A street scene painted with quick brushstrokes", "A landscape emphasizing the overwhelming power of nature"], correctIndex: 3, explanation: "Romanticism highlights awe, intense emotion, individualism, and the terrifyingly grand power of nature (the Sublime)." },
+            { id: 56, category: "Art Movements", prompt: "A painter creates a landscape showing a huge storm, a dramatic sky, and a tiny human figure standing before a powerful mountain. Which style is most evident?", options: ["Cubism", "Fauvism", "Realism", "Romanticism"], correctIndex: 3, explanation: "Contrasting tiny humans against dramatic, immense natural forces is a core motif of Romanticism." },
+            { id: 57, category: "Art Movements", prompt: "A professor asks students to identify a painting based primarily on its visible and energetic brushwork rather than its subject matter. Which term would best describe it?", options: ["Cubist", "Painterly", "Realist", "Surrealist"], correctIndex: 1, explanation: "A painterly style reveals visible brushwork, texture, and physical paint marks rather than smooth, concealed strokes." },
+            { id: 58, category: "Art Movements", prompt: "Which artist is strongly associated with Fauvism?", options: ["Gustave Courbet", "Henri Matisse", "Pablo Picasso", "Salvador Dalí"], correctIndex: 1, explanation: "Henri Matisse was the leader of Les Fauves ('The Wild Beasts'), renowned for his vibrant, expressive color palette." },
+            { id: 59, category: "Art Movements", prompt: "A museum visitor sees a painting with thick paint, obvious brush marks, and a rough textured surface. The subject is still recognizable, but the artist clearly wants the viewer to notice the paint itself. What is the BEST description?", options: ["Cubist movement", "Painterly style", "Realist movement", "Surrealist movement"], correctIndex: 1, explanation: "The painterly technique deliberately highlights impasto, raw paint texture, and visible tactile strokes." },
+            { id: 60, category: "Art Movements", prompt: "Which painting would MOST likely be classified as Expressionist?", options: ["A carefully detailed portrait of a farmer", "A geometric portrait showing several viewpoints", "A landscape capturing sunlight with quick brushstrokes", "A distorted figure surrounded by intense colors expressing fear"], correctIndex: 3, explanation: "Expressionism utilizes distortion, exaggerated shapes, and violent colors to evoke intense psychological moods like fear." },
+            { id: 61, category: "Art Movements", prompt: "A painting shows a person floating above a city while clocks melt on nearby buildings. The scene appears like a strange dream. Which style is represented?", options: ["Fauvism", "Realism", "Romanticism", "Surrealism"], correctIndex: 3, explanation: "Surrealism explores subconscious dream logic, melting objects (like Dalí's clocks), and bizarre, irrational juxtaposition." },
+            { id: 62, category: "Art Movements", prompt: "A painting of a farmer is created with careful attention to his clothing, facial features, tools, and working environment. Which style is MOST appropriate?", options: ["Cubism", "Fauvism", "Realism", "Surrealism"], correctIndex: 2, explanation: "Realism focuses on unvarnished depictions of everyday life, working-class subjects, and natural human conditions." },
+            { id: 63, category: "Art Movements", prompt: "A student creates an artwork where a fish is flying through a classroom, the desks are floating, and the walls have no logical connection to reality. Which movement does this MOST closely represent?", options: ["Impressionism", "Realism", "Romanticism", "Surrealism"], correctIndex: 3, explanation: "Dreamlike elements, defiance of physical gravity, and illogical visual scenarios define Surrealism." },
+            { id: 64, category: "Art Movements", prompt: "Which feature BEST identifies Cubism?", options: ["Dramatic landscapes and powerful nature", "Fragmented forms and multiple viewpoints", "Dreamlike combinations of unrelated objects", "Bright colors used primarily for emotional impact"], correctIndex: 1, explanation: "Cubism breaks down subjects into geometric facets and presents multiple perspective angles simultaneously on a flat plane." },
+            { id: 65, category: "Art Movements", prompt: "Which statement BEST distinguishes Expressionism from Romanticism?", options: ["Expressionism emphasizes inner feelings, while Romanticism often emphasizes nature and imagination.", "Expressionism emphasizes realistic details, while Romanticism emphasizes geometric forms.", "Expressionism emphasizes sunlight, while Romanticism emphasizes visible brushstrokes.", "Expressionism emphasizes ordinary life, while Romanticism emphasizes accurate proportions."], correctIndex: 0, explanation: "Expressionism explores internal human anxiety/existential moods; Romanticism celebrates dramatic natural sublime and imagination." },
+            { id: 66, category: "Art Movements", prompt: "Which artist is strongly associated with The Scream and Expressionism?", options: ["Claude Monet", "Edvard Munch", "Henri Matisse", "Pablo Picasso"], correctIndex: 1, explanation: "Edvard Munch painted 'The Scream' (1893), an iconic masterpiece of raw psychological Expressionism." },
+            { id: 67, category: "Art Movements", prompt: "A painter wants viewers to experience the anxiety felt by a person rather than simply recognize the person's physical appearance. Which style should the painter use?", options: ["Expressionism", "Impressionism", "Realism", "Renaissance"], correctIndex: 0, explanation: "Expressionism distorts objective visual form to prioritize evoking internal psychological states like anxiety." },
+            { id: 68, category: "Art Movements", prompt: "A student says, 'I don't want the colors to look realistic. I want them to be bold and emotionally exciting.' Which style is the student most likely using?", options: ["Cubism", "Fauvism", "Impressionism", "Realism"], correctIndex: 1, explanation: "Fauvism abandons realistic local color in favor of explosive, brilliant, and expressive color choices." },
+            { id: 69, category: "Art Movements", prompt: "A painting shows a woman looking at a vast ocean during a storm. The artist emphasizes her emotional connection to the powerful natural environment. Which movement is MOST likely represented?", options: ["Cubism", "Fauvism", "Realism", "Romanticism"], correctIndex: 3, explanation: "Individual emotional immersion within violent or majestic nature is a defining mark of Romanticism." },
+            { id: 70, category: "Art Movements", prompt: "A painter leaves thick, visible brushstrokes on the canvas instead of blending the paint smoothly. Which characteristic is being demonstrated?", options: ["Classical", "Cubist", "Painterly painting", "Realist"], correctIndex: 2, explanation: "Painterly painting foregrounds the physical application and texture of paint strokes rather than slick blending." },
+            { id: 71, category: "Art Movements", prompt: "An artist paints a human face by dividing it into triangles, rectangles, and overlapping geometric planes. Which style is this?", options: ["Cubism", "Expressionism", "Fauvism", "Impressionism"], correctIndex: 0, explanation: "Deconstructing organic forms into geometric shapes, facets, and overlapping planes is the signature of Cubism." },
+            { id: 72, category: "Art Movements", prompt: "Which characteristic is MOST strongly associated with Fauvism?", options: ["Accurate representation of ordinary life", "Bright and unconventional use of color", "Dreamlike images from the unconscious", "Multiple viewpoints using geometric forms"], correctIndex: 1, explanation: "Fauvism is characterized by shocking, vibrant, non-naturalistic color palettes." },
+            { id: 73, category: "Art Movements", prompt: "A student paints a portrait of a grieving person with an exaggerated face, distorted body, and intense colors to communicate sadness. Which style is most appropriate?", options: ["Expressionism", "Impressionism", "Realism", "Romanticism"], correctIndex: 0, explanation: "Distorting physical proportions and amplifying emotional tones to express grief aligns with Expressionism." },
+            { id: 74, category: "Art Movements", prompt: "An artist paints a sunset using quick, visible strokes to capture the changing effects of light rather than detailed objects. Which movement is demonstrated?", options: ["Cubism", "Expressionism", "Impressionism", "Romanticism"], correctIndex: 2, explanation: "Impressionists prioritize rendering ephemeral light and atmospheric qualities using quick, rapid brushstrokes." },
+            { id: 75, category: "Art Movements", prompt: "An artist paints a tree using bright red leaves and an orange trunk because these colors create a stronger visual impact. What style is demonstrated?", options: ["Cubism", "Fauvism", "Realism", "Romanticism"], correctIndex: 1, explanation: "Using red leaves and orange trunks purely for aesthetic intensity exemplifies Fauvism's arbitrary color usage." }
+        ];
+
+        let studentName = "";
+        let currentIndex = 0;
+        let score = 0;
+        let userAnswers = {}; // { questionId: selectedIndex }
+
+        document.getElementById('start-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const val = document.getElementById('student-name-input').value.trim();
+            if (!val) return;
+            studentName = val.toUpperCase();
+
+            document.getElementById('header-student-name').innerText = studentName;
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('exam-header').classList.remove('hidden');
+            document.getElementById('exam-workspace').classList.remove('hidden');
+
+            renderQuestion();
+        });
+
+        function renderQuestion() {
+            const q = QUESTION_BANK[currentIndex];
+            const card = document.getElementById('question-card');
+            
+            // Progress update
+            const percent = Math.round(((currentIndex + 1) / 75) * 100);
+            document.getElementById('progress-label').innerText = `Question ${currentIndex + 1} of 75`;
+            document.getElementById('progress-percent').innerText = `${percent}%`;
+            document.getElementById('progress-bar-fill').style.width = `${percent}%`;
+            document.getElementById('live-score').innerText = score;
+
+            let html = `
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-950 text-indigo-300 border border-indigo-800">
+                        ${q.category}
+                    </span>
+                    <span class="text-xs text-slate-400 font-mono">Item ${currentIndex + 1} / 75</span>
+                </div>
+
+                <h3 class="text-lg md:text-xl font-medium text-white leading-relaxed">
+                    ${q.prompt}
+                </h3>
+
+                <div id="options-container" class="space-y-3">
+            `;
+
+            const answered = userAnswers[q.id] !== undefined;
+            const selectedOpt = userAnswers[q.id];
+
+            q.options.forEach((opt, optIdx) => {
+                let optStyle = "bg-slate-950 border-slate-800 hover:border-slate-700 text-slate-300 cursor-pointer";
+                let disabledAttr = "";
+
+                if (answered) {
+                    disabledAttr = "disabled";
+                    if (optIdx === q.correctIndex) {
+                        optStyle = "bg-emerald-950/70 border-emerald-500 text-emerald-200 font-medium cursor-default";
+                    } else if (optIdx === selectedOpt && optIdx !== q.correctIndex) {
+                        optStyle = "bg-red-950/70 border-red-500 text-red-200 cursor-default";
+                    } else {
+                        optStyle = "bg-slate-950/40 border-slate-900 text-slate-500 opacity-50 cursor-default";
+                    }
+                }
+
+                html += `
+                    <button ${disabledAttr} onclick="handleSelect(${q.id}, ${optIdx})" class="w-full p-4 rounded-2xl border text-left transition-all flex items-start space-x-3 ${optStyle}">
+                        <div class="w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 border-slate-600"></div>
+                        <span class="text-sm leading-snug">${opt}</span>
+                    </button>
+                `;
+            });
+
+            html += `</div>`;
+
+            if (answered) {
+                const isCorrect = selectedOpt === q.correctIndex;
+                html += `
+                    <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 animate-in">
+                        <div class="flex items-center space-x-2 font-bold text-xs ${isCorrect ? 'text-emerald-400' : 'text-red-400'}">
+                            <span>${isCorrect ? '✓ Correct!' : '✗ Incorrect.'}</span>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed"><strong class="text-indigo-400">Rationale:</strong> ${q.explanation}</p>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="flex items-center justify-end pt-4 border-t border-slate-800">
+                    <button id="next-btn" ${!answered ? 'disabled' : ''} onclick="handleNext()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">
+                        ${currentIndex === 75 - 1 ? 'View Final Results' : 'Next Question →'}
+                    </button>
+                </div>
+            `;
+
+            card.innerHTML = html;
+        }
+
+        function handleSelect(questionId, optIdx) {
+            if (userAnswers[questionId] !== undefined) return;
+            userAnswers[questionId] = optIdx;
+
+            const q = QUESTION_BANK.find(item => item.id === questionId);
+            if (optIdx === q.correctIndex) {
+                score++;
+            }
+
+            renderQuestion();
+        }
+
+        function handleNext() {
+            if (currentIndex < 75 - 1) {
+                currentIndex++;
+                renderQuestion();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('exam-header').classList.add('hidden');
+            document.getElementById('exam-workspace').classList.add('hidden');
+
+            const percentage = Math.round((score / 75) * 100);
+            const isPassed = percentage >= 75;
+
+            document.getElementById('result-student-name').innerText = studentName;
+            document.getElementById('result-raw-score').innerHTML = `${score} <span class="text-slate-600 text-lg">/ 75</span>`;
+            document.getElementById('result-percentage').innerText = `${percentage}%`;
+
+            const badge = document.getElementById('result-badge');
+            const accent = document.getElementById('banner-accent');
+            if (isPassed) {
+                badge.className = "px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800";
+                badge.innerText = "PASSED";
+                accent.className = "absolute top-0 left-0 w-full h-2.5 bg-emerald-500";
+            } else {
+                badge.className = "px-3.5 py-1.5 rounded-full text-xs font-bold bg-red-950 text-red-400 border border-red-800";
+                badge.innerText = "FAILED";
+                accent.className = "absolute top-0 left-0 w-full h-2.5 bg-red-500";
+            }
+
+            const reviewList = document.getElementById('results-review-list');
+            reviewList.innerHTML = '';
+
+            QUESTION_BANK.forEach((q, idx) => {
+                const userChoice = userAnswers[q.id];
+                const isCorrect = userChoice === q.correctIndex;
+                const userChoiceText = userChoice !== undefined ? q.options[userChoice] : "Unanswered";
+
+                const card = document.createElement('div');
+                card.className = `bg-slate-900 border rounded-2xl p-6 space-y-3 ${isCorrect ? 'border-emerald-900/50' : 'border-red-900/50'}`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="px-2.5 py-0.5 rounded-full font-semibold bg-slate-800 text-slate-300">Question ${idx + 1} (${q.category})</span>
+                        <span class="font-bold px-2.5 py-0.5 rounded-full ${isCorrect ? 'bg-emerald-950 text-emerald-400' : 'bg-red-950 text-red-400'}">
+                            ${isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                        </span>
+                    </div>
+                    <p class="text-sm font-medium text-white">${q.prompt}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                            <span class="text-slate-500 block mb-1">Your Answer:</span>
+                            <span class="${isCorrect ? 'text-emerald-300 font-medium' : 'text-red-400 font-medium'}">${userChoiceText}</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                            <span class="text-slate-500 block mb-1">Correct Answer:</span>
+                            <span class="text-emerald-300 font-medium">${q.options[q.correctIndex]}</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-300 bg-slate-950/60 p-3 rounded-xl border border-slate-800"><strong class="text-indigo-400">Rationale:</strong> ${q.explanation}</p>
+                `;
+                reviewList.appendChild(card);
+            });
+
+            document.getElementById('results-screen').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
